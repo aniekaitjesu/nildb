@@ -290,6 +290,84 @@ int nildb_delete(nildb *db,const void *key) {
 	return do_nildb_put(db,key,NULL,1);
 }
 
+int mighty_nildb_set(char *path, char *key, char* value)
+{
+        int ret = -1;
+        nildb db;
+
+        if((path == NULL) || (key == NULL) || (value == NULL)) {
+                printf("NULL parameters\r\n");
+                return ret;
+        }
+
+        printf("mighty_nil_db_set: p %s k %s v %s \r\n", path, key, value);
+
+        if (nildb_open(&db, path, 1024, strlen(key), strlen(value))) {
+                printf("nildb_open: failed\n");
+                return ret;
+        }
+        if (nildb_put(&db, key, value)) {
+                printf("nildb_put: failed (%s)\n", key);
+                return ret;
+        }
+
+        nildb_close(&db);
+
+        return ret;
+}
+
+int mighty_nildb_get(char *path, char *key, char* value)
+{
+        int ret = -1;
+        nildb db;
+
+        if((path == NULL) || (key == NULL) || (value == NULL)) {
+                printf("NULL parameters\r\n");
+                return ret;
+        }
+
+        if (nildb_open(&db, path, 1024, strlen(key), 1024)) {
+                printf("nildb_open: failed\n");
+                return ret;
+        }
+        if (nildb_get(&db, key, value)) {
+                printf("nildb_get: failed (%s)\n", key);
+                return ret;
+        }
+
+        printf("mighty_nil_db_get: p %s k %s v %s \r\n", path, key, value);
+
+        nildb_close(&db);
+
+        return ret;
+}
+
+int mighty_nildb_delete(char *path, char *key)
+{
+        int ret = -1;
+        nildb db;
+
+        if((path == NULL) || (key == NULL)) {
+                printf("NULL parameters\r\n");
+                return ret;
+        }
+
+        if (nildb_open(&db, path, 1024, strlen(key), 1024)) {
+                printf("nildb_open: failed\n");
+                return ret;
+        }
+        if (nildb_delete(&db, key)) {
+                printf("nildb_delete: failed (%s)\n", key);
+                return 1;
+        }
+
+        printf("mighty_nil_db_delete: p %s k %s\r\n", path, key);
+
+        nildb_close(&db);
+
+        return ret;
+}
+
 #ifdef NILDB_TEST
 
 #include <inttypes.h>
@@ -336,6 +414,20 @@ int main(int argc,char **argv)
 
 	nildb_close(&db);
 	printf("All tests OK!\n");
-	return 0;
+	
+	        char *path = "mighty.db";
+        char *key = "refresh_token";
+        char *value = "Atzr|IwEBILl1Jy0XJQMvxDi7K_AQpF8SlQzUkyUoHMEDCaZXOgyIXM28NAUn7OOiAbhl37y2kx5k0d2cBaBbTa-kJhB9SiMeXcv7LQhK9xjfh_nd2LgDF9OTd9iU-zs_tjX-yNcISGZepeKcyoZg5gfNRUsL10dzwip6jaYtR9v1ThoKnRBrN6oIGaCI-rumzaD4BZ0BbhvfzV7e5-87lLH6TLDsp-8Oq-6bR-pS9df28pmRWsjY8mPApzRn9WWSW1lOvJYuf6Hi1Oih7-bJqreZFDyK-gs2wRffF_RFF2mqFTywEtWQjQzlCE7OP-VQ9hNOBIX0yYz_w5rPkOryTFo3zqtveFtozFZZ_8zLgd2w8oBpbqfoufzOhkDNNPVxqI_Cu8k-0NMHhyCW7PgHlTntLuyjsnY3hYFklfZJ4JZec9ODCdvzTYYy3qMK0KS70oAyFaqcNmb-ZDiipA5SHO-LaYfMXsyFZiKr1oBWMD86lyfYXUGtO9dTrpOo_M7FY3hDd-P55iPKj49lYzm1hoO5mfhWSy1olwXIBqplfXZ1Sdm_scDcsdLtfCoBCArIn3O5gG0ZImM";
+
+        char r_value[1024];
+
+        int rret = mighty_nildb_set(path, key, value);
+        rret = mighty_nildb_set(path, "1", value);
+        rret = mighty_nildb_get(path, key, r_value);
+        rret = mighty_nildb_get(path, "1", r_value);
+        rret = mighty_nildb_delete(path, "1");
+        rret = mighty_nildb_get(path, "1", r_value);
+
+        return rret;
 }
 #endif
